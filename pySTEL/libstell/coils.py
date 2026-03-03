@@ -80,6 +80,69 @@ class COILSET():
 			c = current[group==(i+1)]
 			self.groups.extend([COILGROUP(x,y,z,c,coilnames[i])])
 
+	def print_coil_stats(self, lsave=False):
+		"""Prints some statistics of the coils
+
+		This routine prints some statistics of the coils.
+		"""
+		import numpy as np
+		print(f"Number of coil groups: {self.ngroups}")
+		self.coilCoilDist()
+		for i in range(self.ngroups):
+			print(f"Group {i+1} - {self.groups[i].name}:")
+			print(f"  Number of coils: {self.groups[i].ncoils}")
+			print(f"  Current: {self.groups[i].current} A")
+
+			# for j in range(self.groups[i].ncoils):
+			for j in range(1):
+				print(f"    Coil {j+1}:")
+				print(f"      Number of points: {self.groups[i].coils[j].npts}")
+				print(f"      Length: {self.groups[i].coils[j].compute_length():.3f} m")
+				print(f"      Average distance to other coils: {np.mean(self.groups[i].coils[j].dist_coil):.3f} m")
+				# minimum, maximum, standard deviation, and histogram of the distance to other coils
+				print(f"      Minimum distance to other coils: {np.min(self.groups[i].coils[j].dist_coil):.3f} m")
+				print(f"      Maximum distance to other coils: {np.max(self.groups[i].coils[j].dist_coil):.3f} m")
+				print(f"      Standard deviation distance to other coils: {np.std(self.groups[i].coils[j].dist_coil):.3f} m")
+				import matplotlib.pyplot as plt
+				plt.hist(self.groups[i].coils[j].dist_coil,bins=20)
+				plt.xlabel('Distance to other coils [m]')
+				plt.ylabel('Counts')
+				plt.title(f'Coil {j+1} - {self.groups[i].name}')
+				if lsave:
+					plt.savefig(f'coil_{j+1}_group_{i+1}_dist_histogram.png')
+				plt.show()
+
+	def print_plasma_stats(self,x,y,z, lsave=False):
+		"""Prints some statistics of the coil-plasma distance
+
+		This routine prints some statistics of the coil-plasma distance.
+		"""
+		import numpy as np
+		self.coilSurfDist(x,y,z)
+		for i in range(self.ngroups):
+			print(f"Group {i+1} - {self.groups[i].name}:")
+			# for j in range(self.groups[i].ncoils):
+			for j in range(1):
+				print(f"    Coil {j+1}:")
+				# Average
+				print(f"      Average distance to plasma: {np.mean(self.groups[i].coils[j].dist_surf):.3f} m")
+				# Minimum
+				print(f"      Minimum distance to plasma: {np.min(self.groups[i].coils[j].dist_surf):.3f} m")
+				# Maximum
+				print(f"      Maximum distance to plasma: {np.max(self.groups[i].coils[j].dist_surf):.3f} m")
+				# Standard Deviation
+				print(f"      Standard deviation distance to plasma: {np.std(self.groups[i].coils[j].dist_surf):.3f} m")
+				# Histogram
+				import matplotlib.pyplot as plt
+				plt.hist(self.groups[i].coils[j].dist_surf,bins=20)
+				plt.xlabel('Distance to plasma [m]')
+				plt.ylabel('Counts')
+				plt.title(f'Coil {j+1} - {self.groups[i].name}')
+				if lsave:
+					# Coil-to-plasma distance histogram
+					plt.savefig(f'coil_{j+1}_group_{i+1}_ctp_dist_histogram.png')
+				plt.show()
+
 	def rescalecoils(self,npts_new):
 		"""Changes coil resolution
 
@@ -112,7 +175,7 @@ class COILSET():
 				self.groups[i].coils[j].z = cz(s_new)
 				self.groups[i].coils[j].npts = npts_new_array[i]
 
-	def plotcoils(self,plot3D=None):
+	def plotcoils(self,plot3D=None,lsave=False):
 		"""Plots a coilset in 3D using VTK
 
 		This routine plots coils in 3D using VTK
@@ -151,6 +214,7 @@ class COILSET():
 		plt.setBGcolor()
 		# Render if requested
 		if lplotnow: plt.render()
+		if lsave: plt.save('coils.png')
 
 	def plotcoilsHalfFP(self,plot3D=None,color=None):
 		"""Plots a half field period of a coilset in 3D using VTK
@@ -570,11 +634,12 @@ class COILSET():
 		"""Calculates coil-coil distance
 
 		This routine calculates the distance between a coil and
-		another coil. Values are stored in the coil atribute coil_coil.
+		another coil. Values are stored in the coil atribute dist_coil.
 		"""
 		for i in range(self.ngroups):
 			for j in range(self.groups[i].ncoils):
 				for k in range(self.ngroups):
+					if k == i: continue # Don't compare coils in the same group since they are often multi-filament coils which are not physically distinct coils.
 					for l in range(self.groups[i].ncoils):
 						if (i == k) and (j == l): continue
 						xs = self.groups[k].coils[l].x
@@ -653,6 +718,60 @@ class COILSET():
 							xc.extend(xx); yc.extend(yy); zc.extend(zz); cc.extend(c0)
 				mcoil.groups.extend([COILGROUP(np.array(xc),np.array(yc),np.array(zc),np.array(cc),coilname)])
 		return mcoil
+
+	def multiToSingleFilament(self, nheight, nwidth, lskip=None):
+		"""
+			Generates a single filament coil from a multi-filament coil set.
+			The nheight and nwidth parameters specify the number of filaments in each coil. 
+			The function averages the positions of the filaments to generate a single filament coil.
+			It is assumed that the filaments are grouped together in the coilset.
+		"""
+		import numpy as np
+		# Check lskip
+		if type(lskip) is type(None):
+			lskip_array = [False] * self.ngroups
+		else:
+			lskip_array = lskip
+		# Loop over coils
+		scoil = COILSET()
+		scoil.nfp = self.nfp
+		scoil.xmin = self.xmin; scoil.xmax = self.xmax
+		scoil.ymin = self.ymin; scoil.ymax = self.ymax
+		scoil.zmin = self.zmin; scoil.zmax = self.zmax
+		scoil.ngroups = self.ngroups
+		for i in range(self.ngroups):
+			if lskip_array[i]:
+				scoil.groups.extend(self.groups[i])
+			else:
+				ncoil_max = int(self.groups[i].ncoils/(nheight*nwidth))
+				# currents vector, final value is zero to avoid double counting current at the end of the coil
+				npts = self.groups[i].coils[0].npts
+				current = np.ones(ncoil_max*(npts)) * self.groups[i].current
+				current[npts-1::npts] = 0.0
+				print(current.shape)
+				coilname = self.groups[i].name
+				# Construct a new coil group, where every nfilaments=nheight*nwidth coils are averaged together to make a single coil.
+				xc_avg = []; yc_avg = []; zc_avg = []
+				for j in range(ncoil_max):
+					xc_sum = np.zeros(self.groups[i].coils[j*nheight*nwidth].npts)
+					yc_sum = np.zeros(self.groups[i].coils[j*nheight*nwidth].npts)
+					zc_sum = np.zeros(self.groups[i].coils[j*nheight*nwidth].npts)
+					for k in range(nheight*nwidth):
+						idx = j*(nheight*nwidth) + k
+						xc_sum = xc_sum + self.groups[i].coils[idx].x
+						yc_sum = yc_sum + self.groups[i].coils[idx].y
+						zc_sum = zc_sum + self.groups[i].coils[idx].z
+					xc_avg.extend(xc_sum/(nheight*nwidth))
+					yc_avg.extend(yc_sum/(nheight*nwidth))
+					zc_avg.extend(zc_sum/(nheight*nwidth))
+					# convert to numpy arrays
+				xc_avg = np.array(xc_avg)
+				yc_avg = np.array(yc_avg)
+				zc_avg = np.array(zc_avg)
+
+				scoil.groups.extend([COILGROUP(xc_avg,yc_avg,zc_avg,current,coilname)])
+		return scoil
+
 
 	def fitSurface(self):
 		"""Returns best fit surface to coil set
@@ -1116,6 +1235,22 @@ class COIL():
 		self.zt = None
 		self.dist_surf = None
 		self.dist_coil = None
+	
+	def compute_length(self):
+		"""Computes the length of the coil
+
+		This routine computes the length of the coil.
+
+		Parameters
+		----------
+		Returns
+		----------
+		length : real
+			The length of the coil [m]
+		"""
+		import numpy as np
+		length = sum(np.sqrt(self.dx*self.dx + self.dy*self.dy + self.dz*self.dz))
+		return length
 
 	def vecpot(self,x,y,z,current):
 		"""Calculates Vector potential

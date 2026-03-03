@@ -30,6 +30,8 @@ if __name__=="__main__":
 		help="Plot volumetric coil of given width and height [m].", default = None)
 	parser.add_argument("--multifilamentcoil", dest="hwnhnw",
 		help="Create a multi-filament coil height,width,nheight,nwidth", default = None)
+	parser.add_argument("--singlefilamentcoil", dest="singlefil",
+		help="Create a single filament coil from a multi-filament coil of nheight,nwidth", default = None)
 	parser.add_argument("-b", "--bfield", dest="bxyz",
 		help="Output B field at x,y,z", default = None)
 	parser.add_argument("-a", "--afield", dest="axyz",
@@ -94,6 +96,11 @@ if __name__=="__main__":
 		if args.hwnhnw:
 			height,width,nh,nw = args.hwnhnw.split(',')
 			coils_new = coils.singleToMultiFilament(height=float(height),width=float(width),nheight=int(nh),nwidth=int(nw))
+			coils = coils_new
+			if args.lplot: coils.plotcoils()
+		if args.singlefil:
+			nh,nw = args.singlefil.split(',')
+			coils_new = coils.multiToSingleFilament(nheight=int(nh),nwidth=int(nw))
 			coils = coils_new
 			if args.lplot: coils.plotcoils()
 		if args.axyz:

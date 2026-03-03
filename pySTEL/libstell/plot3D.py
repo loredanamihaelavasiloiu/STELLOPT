@@ -50,6 +50,25 @@ class PLOT3D():
 		else:
 			self.colororder = ['red','green','blue','yellow','magenta','cyan','aqua']
 
+	def save(self,filename):
+		"""Save the current render to a file
+
+		The routine allows one to save the current render to a file. The
+		format is determined by the filename extension.
+
+		Parameters
+		----------
+		filename : str
+			Filename to save render to, extension determines format.
+		"""
+		w2if = vtk.vtkWindowToImageFilter()
+		w2if.SetInput(self.render_window)
+		w2if.Update()
+		writer = vtk.vtkPNGWriter()
+		writer.SetFileName(filename)
+		writer.SetInputConnection(w2if.GetOutputPort())
+		writer.Write()
+
 	def setRenderer(self,renderer):
 		"""Set the renderer
 

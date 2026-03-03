@@ -174,7 +174,7 @@ class FIELDLINES():
 			c = color_data[0:self.nlines:nskip,k:self.nsteps-1:self.npoinc]
 			ax.scatter(x,y,s=0.1,c=c,marker='.')
 		else:
-			ax.plot(x,y,'.k',markersize=0.1)
+			ax.plot(x,y,'.k',markersize=0.2)
 		# Add the hc
 		if hasattr(self,'Rhc_lines'):
 			nlines_hc = self.Rhc_lines.shape[0]

@@ -55,8 +55,8 @@ class BNORM(FourierRep):
 
 		Parameters
 		----------
-		file : str
-			Path to wout file.
+		filename : str
+			Path to bnorm_real file.
 		"""
 		import numpy as np
 		f = open(filename,'r')
@@ -91,6 +91,46 @@ class BNORM(FourierRep):
 			bnreal[j]        = float(txt[11])
 			bcreal[j]        = float(txt[12])
 			bnormal_total[j] = float(txt[13])
+
+		# Field periodicity of the stellarator
+		ratio = phi/zeta
+		# Remove Nans from ratio
+		ratio = ratio[~np.isnan(ratio)]
+		Nfp = int(2/np.mean(ratio))
+
+		self.xreal = np.zeros(self.nuv*Nfp)
+		self.yreal = np.zeros(self.nuv*Nfp)
+		self.zzreal = np.zeros(self.nuv*Nfp)
+		self.xreal[0:self.nuv] = rreal * np.cos(phi)
+		self.yreal[0:self.nuv] = rreal * np.sin(phi)
+		self.zzreal[0:self.nuv] = zreal
+		self.xreal[self.nuv:2*self.nuv] = rreal * np.sin(phi)
+		self.yreal[self.nuv:2*self.nuv] = rreal * np.cos(phi)
+		self.zzreal[self.nuv:2*self.nuv] = -zreal
+		self.xreal[2*self.nuv:3*self.nuv] = -rreal * np.sin(phi)
+		self.yreal[2*self.nuv:3*self.nuv] = rreal * np.cos(phi)
+		self.zzreal[2*self.nuv:3*self.nuv] = zreal
+		self.xreal[3*self.nuv:4*self.nuv] = -rreal * np.cos(phi)
+		self.yreal[3*self.nuv:4*self.nuv] = rreal * np.sin(phi)
+		self.zzreal[3*self.nuv:4*self.nuv] = -zreal
+		self.xreal[4*self.nuv:5*self.nuv] = rreal * np.cos(phi)
+		self.yreal[4*self.nuv:5*self.nuv] = -rreal * np.sin(phi)
+		self.zzreal[4*self.nuv:5*self.nuv] = -zreal
+		self.xreal[5*self.nuv:6*self.nuv] = rreal * np.sin(phi)
+		self.yreal[5*self.nuv:6*self.nuv] = -rreal * np.cos(phi)
+		self.zzreal[5*self.nuv:6*self.nuv] = zreal
+		self.xreal[6*self.nuv:7*self.nuv] = -rreal * np.sin(phi)
+		self.yreal[6*self.nuv:7*self.nuv] = -rreal * np.cos(phi)
+		self.zzreal[6*self.nuv:7*self.nuv] = -zreal
+		self.xreal[7*self.nuv:8*self.nuv] = -rreal * np.cos(phi)
+		self.yreal[7*self.nuv:8*self.nuv] = -rreal * np.sin(phi)
+		self.zzreal[7*self.nuv:8*self.nuv] = zreal
+		# for i in range(Nfp):
+			# self.xreal[i*self.nuv:(i+1)*self.nuv] = rreal * np.cos(phi)
+			# self.yreal[i*self.nuv:(i+1)*self.nuv] = rreal * np.sin(phi)
+			# self.zzreal[i*self.nuv:(i+1)*self.nuv] = zreal
+		self.full_bnormal_total = np.tile(bnormal_total, Nfp)
+
 		nu = max(u)
 		nv = max(v)
 		self.u             = u.reshape(nu,nv)
@@ -106,6 +146,118 @@ class BNORM(FourierRep):
 		self.bnreal        = bnreal.reshape(nu,nv)
 		self.bcreal        = bcreal.reshape(nu,nv)
 		self.bnormal_total = bnormal_total.reshape(nu,nv)
+		
+
+	def read_bnorm_harm(self,filename):
+		"""Reads a BNORM_HARM file
+
+		This routine reads and initilizes the BNORM class
+		with variable information from a BNORM_HARM file.
+
+		Parameters
+		----------
+		filename : str
+			Path to bnorm_harm file.
+		"""
+		import numpy as np
+		f = open(filename,'r')
+		lines = f.readlines()
+		f.close()
+		# First line contains the number of modes
+		self.mnmax = int(lines[0])
+		lines.pop(0)
+		self.m = np.zeros((self.mnmax,1))
+		self.n = np.zeros((self.mnmax,1))
+		self.bmnc = np.zeros((self.mnmax,1))
+		self.bmns = np.zeros((self.mnmax,1))
+		for line in lines:
+			(txt0,txt1,txt2,txt3,txt4) = line.split()
+			mn = int(txt0)-1
+			self.m[mn] = int(txt1)
+			self.n[mn] = int(txt2)
+			self.bmnc[mn] = float(txt3)
+			self.bmns[mn] = float(txt4)
+
+	def plot_bnorm_real_histogram(self,ax=None, lsave=False):
+		"""Plots a histogram of the Bnormal total values
+
+		This routine plots a histogram of the bnormal total values.
+
+		Parameters
+		----------
+		ax : axes (optional)
+			Matplotlib axes object to plot to.
+		"""
+		import numpy as np
+		import matplotlib.pyplot as pyplot
+		lplotnow = False
+		if not ax:
+			ax = pyplot.axes()
+			lplotnow = True
+		ax.hist(self.bnormal_total.flatten(),bins=100)
+		ax.set_xlabel(r'$B_{normal}$ [T]')
+		ax.set_ylabel('Counts')
+		ax.set_title(rf'Bnorm_real Total Values')
+		if lplotnow: pyplot.show()
+		if lsave: pyplot.savefig('bnorm_real_histogram.png')
+
+	def print_bnorm_real_stats(self):
+		"""Prints some statistics of the Bnormal total values
+
+		This routine prints some statistics of the bnormal total values.
+		"""
+		import numpy as np
+		print(f'BNORMAL REAL STATSITICS:')
+		print(f'Minimum: {np.min(self.bnormal_total)}')
+		print(f'Maximum: {np.max(self.bnormal_total)}')
+		print(f'Mean: {np.mean(self.bnormal_total)}')
+		print(f'Standard Deviation: {np.std(self.bnormal_total)}')
+		print(f'Variance: {np.var(self.bnormal_total)}')
+		# Percentiles
+		print(f'25th Percentile: {np.percentile(self.bnormal_total,25)}')
+		print(f'50th Percentile: {np.percentile(self.bnormal_total,50)}')
+		print(f'75th Percentile: {np.percentile(self.bnormal_total,75)}')
+
+	def plot_bnorm_harm(self,ax=None,type='sin', lsave=False):
+		"""Plots the Bnormal spectrum
+
+		Parameters
+		----------
+		ax : axes (optional)
+			Matplotlib axes object to plot to.
+		"""
+		import numpy as np
+		import matplotlib.pyplot as pyplot
+		lplotnow = False
+		if not ax:
+			ax = pyplot.axes()
+			lplotnow = True
+		# Plot the spectrum as a tile plot. Each m,n mode is a tile, colored by the value of bmns
+		mmax = int(max(np.squeeze(self.m)))
+		nmax = int(max(np.squeeze(self.n)))
+		bmn = np.zeros((mmax+1,2*nmax+1))
+		for mn in range(self.mnmax):
+			m = int(self.m[mn])
+			n = int(self.n[mn]) + nmax
+			if type == 'sin':
+				bmn[m,n] = self.bmns[mn]
+			elif type == 'cos':
+				bmn[m,n] = self.bmnc[mn]
+		x = np.linspace(0,mmax,mmax+1)
+		y = np.linspace(-nmax,nmax,2*nmax+1)
+		# Include colorbar, quadmesh without interpolation
+		# The colormap should be symmetric about zero, so that positive and negative values are colored differently
+		# Define the norm that ensures the colormap is symmetric about zero
+		import matplotlib
+		norm = matplotlib.colors.CenteredNorm()
+		quadmesh=ax.pcolormesh(x,y,bmn.T,cmap='seismic',norm=norm)
+		pyplot.colorbar(quadmesh,label='$B_{normal}$ [arb]',ax=ax)
+
+		ax.set_xlabel('Poloidal Modes (m)')
+		ax.set_ylabel('Toroidal Modes (n)')
+		ax.set_title(rf'BNORM Harmonic Spectrum (Sin)')
+		if lplotnow: pyplot.show()
+		if lsave: pyplot.savefig(f'bnorm_harm_{type}.png')
 
 	def plotBnmnSpectrum(self,ax=None,cmap='jet'):
 		"""Plots the Bnormal spectrum for a surface
@@ -174,7 +326,7 @@ class BNORM(FourierRep):
 		ax.set_xlabel('Toroidal Angle (phi) [rad]')
 		ax.set_ylabel('Poloidal Angle (phi) [rad]')
 		ax.set_title(rf'Total B-Normal Field')
-		#pyplot.colorbar(hmesh,label='$log_{10}$[arb]',ax=ax)
+		# pyplot.colorbar(hmesh,label='$log_{10}$[arb]',ax=ax)
 		if lplotnow: pyplot.show()
 
 	def plotBsurf(self,ax=None,cmap='jet'):
@@ -211,7 +363,24 @@ class BNORM(FourierRep):
 		if lplotnow: pyplot.show()
 		return quadmesh
 
+	def plotBrealsurf(self,ax=None,cmap='jet'):
+		# Scatters the bnormal values on the surface, colored by the bnormal value
+		import numpy as np
+		import matplotlib.pyplot as pyplot
+		lplotnow = False
+		if not ax:
+			# Create 3D axes
+			ax = pyplot.axes(projection='3d')
+			lplotnow = True
 
+		print(self.xreal.shape, self.yreal.shape, self.zzreal.shape, self.full_bnormal_total.shape)
+		ax.scatter(self.xreal, self.yreal, self.zzreal, c=self.full_bnormal_total, cmap='viridis', alpha=0.7)
+		# Colorbar
+		pyplot.colorbar(ax.collections[0], label='B_n (T)', ax=ax)
+		ax.set_aspect('equal')
+
+		if lplotnow: pyplot.show()
+		return ax
 
 # Main routine
 if __name__=="__main__":

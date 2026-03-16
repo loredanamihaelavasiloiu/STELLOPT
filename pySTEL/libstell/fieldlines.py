@@ -140,7 +140,7 @@ class FIELDLINES():
 		iota[0] = 2.0 * iota[1] - iota[2]
 		return reff, iota, iota_err
 
-	def plot_poincare(self,phi,nskip=1,ax=None,color_data=None):
+	def plot_poincare(self,phi,nskip=1,ax=None,color_data=None,lsave=False):
 		"""Creates a basic Poincare plot
 
 		Plots a Poincare plot given a toroidal angle in radians (phi).
@@ -174,7 +174,7 @@ class FIELDLINES():
 			c = color_data[0:self.nlines:nskip,k:self.nsteps-1:self.npoinc]
 			ax.scatter(x,y,s=0.1,c=c,marker='.')
 		else:
-			ax.plot(x,y,'.k',markersize=0.2)
+			ax.plot(x,y,'.k',markersize=0.1)
 		# Add the hc
 		if hasattr(self,'Rhc_lines'):
 			nlines_hc = self.Rhc_lines.shape[0]
@@ -188,6 +188,7 @@ class FIELDLINES():
 		ax.set_title(rf'FIELDLINES $\phi$ = {np.rad2deg(self.PHI_lines[0,k]):3.1f}')
 		ax.set_aspect('equal')
 		ax.set_xlim(rmin,rmax)
+		if lsave: pyplot.savefig(f'fieldlines_poincare_phi{int(np.rad2deg(self.PHI_lines[0,k])):03d}.png',dpi=300)
 		if lplotnow: pyplot.show()
 
 	def plot_cloud(self,k,pointsize=0.01,color='red',plot3D=None):

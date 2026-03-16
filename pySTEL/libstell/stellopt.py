@@ -502,7 +502,34 @@ class STELLOPT():
 		# plot if axes not passed
 		if lplotnow: plt.show()
 
-	def plot_stellopt_coil_curvature(self,plot3D=None,cmin=None):
+	def print_coil_curvature_stats(self):
+		"""Prints coil curvature statistics
+
+		This routine prints statistics of the coil curvature from the 
+		coil_curvature file for each coil. Prints average, max, and rms curvature.
+		"""
+		import numpy as np
+		ncoils = self.coil_curvature.shape[0]
+		print('Coil curvature statistics:')
+		for j in range(ncoils):
+			curvature = self.coil_curvature[j,:,:,:,14].flatten()
+			print(f'Coil {j+1}: avg: {np.mean(curvature):.3e} m^-1, max: {max(curvature):.3e} m^-1, rms: {np.sqrt(np.mean(curvature*curvature)):.3e} m^-1')
+
+
+	def print_coil_torsion_stats(self):
+		"""Prints coil torsion statistics
+
+		This routine prints statistics of the coil torsion from the 
+		coil_curvature file for each coil
+		"""
+		import numpy as np
+		ncoils = self.coil_curvature.shape[0]
+		print('Coil torsion statistics:')
+		for j in range(ncoils):
+			torsion = self.coil_curvature[j,:,:,:,15].flatten()
+			print(f'Coil {j+1}: avg: {np.mean(torsion):.3e} m^-1, max: {max(torsion):.3e} m^-1, rms: {np.sqrt(np.mean(torsion*torsion)):.3e} m^-1')
+
+	def plot_stellopt_coil_curvature(self,plot3D=None,cmin=None,lsave=False,save_folder=None):
 		"""Plots coil curvature in 3D.
 
 		This routine plots the curvature of the coil_curvature file.
@@ -557,10 +584,13 @@ class STELLOPT():
 		plt.setBGcolor()
 		# Colorbar
 		plt.colorbar(title='Coil Curvature')
+		# Save if requested
+		if lsave: plt.save(f'{save_folder}/coil_curvature.png')
+
 		# Render if requested
 		if lplotnow: plt.render()
 
-	def plot_stellopt_coil_torsion(self,plot3D=None,cmin=None):
+	def plot_stellopt_coil_torsion(self,plot3D=None,cmin=None, lsave=False,save_folder=None):
 		"""Plots coil torsion in 3D.
 
 		This routine plots the torsion of the coil_curvature file.
@@ -615,6 +645,8 @@ class STELLOPT():
 		plt.setBGcolor()
 		# Colorbar
 		plt.colorbar(title='Coil Torsion')
+		# Save if requested
+		if lsave: plt.save(f'{save_folder}/coil_torsion.png')
 		# Render if requested
 		if lplotnow: plt.render()
 

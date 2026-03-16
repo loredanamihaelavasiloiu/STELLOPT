@@ -24,7 +24,7 @@ class COILSET():
 		self.zmin=None; self.zmax=None;
 		self.color_cycle = deque(['g', 'b', 'c', 'm', 'y', 'k'])
 
-	def read_coils_file(self,filename):
+	def read_coils_file(self,ext):
 		"""Directly reads a coils file
 
 		This routine reads a coils file into the class.
@@ -35,7 +35,8 @@ class COILSET():
 			Path to coils file.
 		"""
 		import numpy as np
-		f = open(filename,'r')
+		self.ext = ext
+		f = open('coils.'+ext,'r')
 		lines = f.readlines()
 		f.close()
 		if  'periods' in lines[0]:
@@ -109,7 +110,7 @@ class COILSET():
 				plt.ylabel('Counts')
 				plt.title(f'Coil {j+1} - {self.groups[i].name}')
 				if lsave:
-					plt.savefig(f'coil_{j+1}_group_{i+1}_dist_histogram.png')
+					plt.savefig(f'{self.ext}/coil_{j+1}_group_{i+1}_dist_histogram.png')
 				plt.show()
 
 	def print_plasma_stats(self,x,y,z, lsave=False):
@@ -140,7 +141,7 @@ class COILSET():
 				plt.title(f'Coil {j+1} - {self.groups[i].name}')
 				if lsave:
 					# Coil-to-plasma distance histogram
-					plt.savefig(f'coil_{j+1}_group_{i+1}_ctp_dist_histogram.png')
+					plt.savefig(f'{self.ext}/coil_{j+1}_group_{i+1}_ctp_dist_histogram.png')
 				plt.show()
 
 	def rescalecoils(self,npts_new):
@@ -214,7 +215,7 @@ class COILSET():
 		plt.setBGcolor()
 		# Render if requested
 		if lplotnow: plt.render()
-		if lsave: plt.save('coils.png')
+		if lsave: plt.save(self.ext+'/coils.png')
 
 	def plotcoilsHalfFP(self,plot3D=None,color=None):
 		"""Plots a half field period of a coilset in 3D using VTK
@@ -684,6 +685,7 @@ class COILSET():
 		faces = []
 		l = int(0)
 		mcoil = COILSET()
+		mcoil.ext = self.ext
 		mcoil.nfp = self.nfp
 		mcoil.xmin = self.xmin; mcoil.xmax = self.xmax
 		mcoil.ymin = self.ymin; mcoil.ymax = self.ymax
@@ -734,6 +736,7 @@ class COILSET():
 			lskip_array = lskip
 		# Loop over coils
 		scoil = COILSET()
+		scoil.ext = self.ext
 		scoil.nfp = self.nfp
 		scoil.xmin = self.xmin; scoil.xmax = self.xmax
 		scoil.ymin = self.ymin; scoil.ymax = self.ymax

@@ -47,7 +47,7 @@ class BNORM(FourierRep):
 			self.bnmns[0,mn] = float(txt3)
 			mn = mn + 1
 
-	def read_bnorm_real(self,filename):
+	def read_bnorm_real(self,ext):
 		"""Reads a BNORM_REAL file
 
 		This routine reads and initilizes the BNORM class
@@ -59,7 +59,8 @@ class BNORM(FourierRep):
 			Path to bnorm_real file.
 		"""
 		import numpy as np
-		f = open(filename,'r')
+		self.ext = ext
+		f = open("bnorm_real."+ext,'r')
 		lines = f.readlines()
 		f.close()
 		self.nuv=int(lines[0])
@@ -148,7 +149,7 @@ class BNORM(FourierRep):
 		self.bnormal_total = bnormal_total.reshape(nu,nv)
 		
 
-	def read_bnorm_harm(self,filename):
+	def read_bnorm_harm(self,ext):
 		"""Reads a BNORM_HARM file
 
 		This routine reads and initilizes the BNORM class
@@ -160,7 +161,8 @@ class BNORM(FourierRep):
 			Path to bnorm_harm file.
 		"""
 		import numpy as np
-		f = open(filename,'r')
+		self.ext = ext
+		f = open("bnorm_harm."+ext,'r')
 		lines = f.readlines()
 		f.close()
 		# First line contains the number of modes
@@ -198,8 +200,8 @@ class BNORM(FourierRep):
 		ax.set_xlabel(r'$B_{normal}$ [T]')
 		ax.set_ylabel('Counts')
 		ax.set_title(rf'Bnorm_real Total Values')
+		if lsave: pyplot.savefig(self.ext+'/bnorm_real_histogram.png')
 		if lplotnow: pyplot.show()
-		if lsave: pyplot.savefig('bnorm_real_histogram.png')
 
 	def print_bnorm_real_stats(self):
 		"""Prints some statistics of the Bnormal total values
@@ -256,8 +258,8 @@ class BNORM(FourierRep):
 		ax.set_xlabel('Poloidal Modes (m)')
 		ax.set_ylabel('Toroidal Modes (n)')
 		ax.set_title(rf'BNORM Harmonic Spectrum (Sin)')
+		if lsave: pyplot.savefig(f'{self.ext}/bnorm_harm_{type}.png')
 		if lplotnow: pyplot.show()
-		if lsave: pyplot.savefig(f'bnorm_harm_{type}.png')
 
 	def plotBnmnSpectrum(self,ax=None,cmap='jet'):
 		"""Plots the Bnormal spectrum for a surface
@@ -329,7 +331,7 @@ class BNORM(FourierRep):
 		# pyplot.colorbar(hmesh,label='$log_{10}$[arb]',ax=ax)
 		if lplotnow: pyplot.show()
 
-	def plotBsurf(self,ax=None,cmap='jet'):
+	def plotBsurf(self,ax=None,cmap='jet',lsave=False):
 		"""Plots the Bnormal on a surface
 
 		This routine plots the bnormal.
@@ -360,10 +362,45 @@ class BNORM(FourierRep):
 		ax.set_ylabel(r'Poloidal Angle ($\theta$) [rad]')
 		ax.set_title(rf'BNORM')
 		pyplot.colorbar(quadmesh,label=r'$B_{normal}$ [arb]',ax=ax)
+		if lsave: pyplot.savefig(f'{self.ext}/bnorm_surf.png')
 		if lplotnow: pyplot.show()
 		return quadmesh
 
-	def plotBrealsurf(self,ax=None,cmap='jet'):
+	def plotBrealsurf(self,ax=None,cmap='jet',lsave=False):
+		"""Plots the Bnormal on a surface
+
+		This routine plots the bnormal.
+
+		Parameters
+		----------
+		ax : axes (optional)
+			Matplotlib axes object to plot to.
+		cmap : string (optional)
+			Matplotlib colormap.
+
+		Returns
+		-------
+		scatter : matplotlib.collections.PathCollection
+			PathCollection as produced by scatter
+		"""
+		import numpy as np
+		import matplotlib.pyplot as pyplot
+		lplotnow = False
+		if not ax:
+			ax = pyplot.axes()
+			lplotnow = True
+
+		scatter = ax.scatter(self.theta.flatten(), self.phi.flatten(), c=self.bnormal_total.flatten(), cmap=cmap, alpha=0.7)
+		ax.set_xlabel(r'Poloidal Angle ($\theta$) [rad]')
+		ax.set_ylabel(r'Toroidal Angle ($\phi$) [rad]')
+		ax.set_title(rf'BNORM Real')
+		pyplot.colorbar(scatter,label=r'$B_{normal}$ [T]',ax=ax)
+		
+		if lsave: pyplot.savefig(f'{self.ext}/bnorm_real_surf.png')
+		if lplotnow: pyplot.show()
+		return scatter
+
+	def plotBrealsurf_3D(self,ax=None,cmap='jet',lsave=False):
 		# Scatters the bnormal values on the surface, colored by the bnormal value
 		import numpy as np
 		import matplotlib.pyplot as pyplot
@@ -379,6 +416,7 @@ class BNORM(FourierRep):
 		pyplot.colorbar(ax.collections[0], label='B_n (T)', ax=ax)
 		ax.set_aspect('equal')
 
+		if lsave: pyplot.savefig(f'{self.ext}/bnorm_real_surf.png')
 		if lplotnow: pyplot.show()
 		return ax
 

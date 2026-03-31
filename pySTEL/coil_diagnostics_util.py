@@ -15,8 +15,8 @@ if __name__=="__main__":
 	import numpy as np
 	from stl import mesh
 	parser = ArgumentParser(description= 
-		'''Provides class for accessing coils files also serves as a
-		   simple tool for assessing coils or coils files.''')
+		'''
+		   ''')
 	parser.add_argument("-e", "--ext", dest="ext",
         help="STELLOPT files extension", default = None)
 	parser.add_argument("-ll", "--loglevel", dest="loglevel",
@@ -24,6 +24,9 @@ if __name__=="__main__":
 		" Options: -3, -2, -1, 0, 1, 2, 3. Default: 0", default = 0, type=int)
 	parser.add_argument("-mc", dest="mc",
         help="Signals that the input coil file is a multi-filament coil and should be averaged to a single filament coil", default = None)
+
+	parser.add_argument("-mor", "--monitor_optimization_run", dest="monitor_opt_run", action='store_true',
+		help="Monitor the optimization run by plotting diagnostics at each iteration.", default = False)
 	
 	parser.add_argument("-c", "--coil", dest="coils_file",
 		help="Coils file for input", default = None)
@@ -76,6 +79,13 @@ if __name__=="__main__":
 			print(f'Directory already exists: {args.ext}')
 	if args.ext:
 		stellopt = STELLOPT()
+		if args.monitor_opt_run:
+			stellopt.read_stellopt_output("stellopt."+args.ext)
+			stellopt.plot_stellopt_targets()
+			stellopt.plot_stellopt_chisq()
+			stellopt.plot_stellopt_total_chisq()
+			args.ext = args.ext+"_opt0" # If we monitor the optimization run, we want to plot the diagnostics for the last iteration, which is saved with the extension _opt0 
+
 		vmec_data = VMEC() 
 		bnorm = BNORM()
 		try:
@@ -179,9 +189,9 @@ if __name__=="__main__":
 		field_data.read_fieldlines('fieldlines_'+args.fieldlines_ext+'.h5')
 		if args.lplotfieldlines:
 			phi0 = 0
-			field_data.plot_poincare(0, lsave=args.lsaveplots)
+			field_data.plot_poincare(0, lsave=args.lsaveplots, savelocation=args.ext)
 			phi1 = field_data.PHI_lines[0,int(np.round(field_data.npoinc/4))]
-			field_data.plot_poincare(phi1, lsave=args.lsaveplots)
+			field_data.plot_poincare(phi1, lsave=args.lsaveplots, savelocation=args.ext)
 			phi2 = field_data.PHI_lines[0,int(np.round(field_data.npoinc/2))]
-			field_data.plot_poincare(phi2, lsave=args.lsaveplots)
+			field_data.plot_poincare(phi2, lsave=args.lsaveplots, savelocation=args.ext)
 			

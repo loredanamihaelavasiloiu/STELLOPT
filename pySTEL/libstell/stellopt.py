@@ -451,6 +451,139 @@ class STELLOPT():
 		# Flatten ITER
 		self.ITER = self.ITER.flatten()
 
+	def plot_stellopt_total_chisq(self,ax=None):
+		"""Plot the total STELLOPT chi-squared
+
+		This routine plots the total STELLOPT chi-squared.
+
+		Parameters
+		----------
+		ax : axes (optional)
+			Matplotlib axes object to plot to.
+		"""
+		import numpy as np
+		import matplotlib.pyplot as plt
+		if not hasattr(self, 'targetnames'):
+			self.read_stellopt_varlabels()
+		if not hasattr(self,'VALS'):
+			print(' Must read output file first')
+			return
+		# Handle the axes
+		lplotnow = False
+		if not ax:
+			ax = plt.axes()
+			lplotnow = True
+		chisq_total = np.zeros_like(self.ITER)
+		for targ_name in self.target_names:
+			targ_name_full = targ_name+"_CHISQ"
+			if hasattr(self,targ_name_full):
+				targ_chisq = getattr(self,targ_name_full)
+				chisq_total = chisq_total + np.sum(targ_chisq,axis=1)
+		ax.plot(self.ITER,chisq_total,label='Total')
+		ax.set_xlabel('ITER')
+		ax.set_ylabel('Chi-squared')
+		ax.legend()
+		ax.set_title('STELLOPT Total Chi-squared')
+		if lplotnow: plt.show()
+
+	def plot_stellopt_chisq(self,target='all',ax=None):
+		"""Plot the STELLOPT chi-squared
+
+		This routine plots the STELLOPT chi-squared for a given target name.
+		If no target is given then it plots all targets.
+
+		Parameters
+		----------
+		target : str
+			Quantity to plot (default: all)
+		ax : axes (optional)
+			Matplotlib axes object to plot to.
+		"""
+		import numpy as np
+		import matplotlib.pyplot as plt
+		if not hasattr(self, 'targetnames'):
+			self.read_stellopt_varlabels()
+		if not hasattr(self,'VALS'):
+			print(' Must read output file first')
+			return
+		# Handle the axes
+		lplotnow = False
+		if not ax:
+			ax = plt.axes()
+			lplotnow = True
+		if target == 'all':
+			for targ_name in self.target_names:
+				targ_name_full = targ_name+"_CHISQ"
+				if hasattr(self,targ_name_full):
+					targ_chisq = getattr(self,targ_name_full)
+					ax.plot(self.ITER,targ_chisq,label=targ_name)
+			ax.set_xlabel('ITER')
+			ax.set_ylabel('Chi-squared')
+			ax.legend()
+			ax.set_title('STELLOPT Chi-squared')
+		else:
+			targ_name_full = target+'_CHISQ'
+			if hasattr(self,targ_name_full):
+				targ_chisq = getattr(self,targ_name_full)
+				ax.plot(self.ITER,targ_chisq,label=target)
+				ax.set_xlabel('ITER')
+				ax.set_ylabel('Chi-squared')
+				ax.legend()
+				ax.set_title(f'STELLOPT Chi-squared {target}')
+			else:
+				print(f'Target {target} not found.')
+				return
+		if lplotnow: plt.show()
+
+	def plot_stellopt_targets(self,target='all',ax=None):
+		"""Plot the STELLOPT targets
+
+		This routine plots the STELLOPT targets for a given target name.
+		If no target is given then it plots all targets.
+
+		Parameters
+		----------
+		target : str
+			Quantity to plot (default: all)
+		ax : axes (optional)
+			Matplotlib axes object to plot to.
+		"""
+		import numpy as np
+		import matplotlib.pyplot as plt
+		if not hasattr(self, 'targetnames'):
+			self.read_stellopt_varlabels()
+		if not hasattr(self,'VALS'):
+			print(' Must read output file first')
+			return
+		# Handle the axes
+		lplotnow = False
+		if not ax:
+			ax = plt.axes()
+			lplotnow = True
+		if target == 'all':
+			for targ_name in self.target_names:
+				targ_name_full = targ_name+"_VAL"
+				if hasattr(self,targ_name_full):
+					targ_val = getattr(self,targ_name_full)
+					ax.plot(self.ITER,targ_val,label=targ_name)
+			ax.set_xlabel('ITER')
+			ax.set_ylabel('Target Value')
+			ax.legend()
+			ax.set_title('STELLOPT Targets')
+		else:
+			targ_name_full = target+'_VAL'
+			if hasattr(self,targ_name_full):
+				targ_val = getattr(self,targ_name_full)
+				ax.plot(self.ITER,targ_val,label=target)
+				ax.set_xlabel('ITER')
+				ax.set_ylabel('Target Value')
+				ax.legend()
+				ax.set_title(f'STELLOPT Target {target}')
+			else:
+				print(f'Target {target} not found.')
+				return
+		if lplotnow: plt.show()
+
 	def plot_stellopt_jacobian(self,target='all',ax=None):
 		"""Plot the Jacobian for a given target
 

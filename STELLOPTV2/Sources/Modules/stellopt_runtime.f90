@@ -195,8 +195,11 @@
       INTEGER, PARAMETER ::  MPI_FREE_ERR       = 840
       INTEGER, PARAMETER ::  MPI_FINE_ERR       = 890
       REAL(rprec), PARAMETER :: STELLOPT_VERSION = 2.85      
+     ! LOGICAL                  :: lverb, lneed_output, lrestart,&
+     !                             lauto_domain, lparallel,lrenorm, loneiter
       LOGICAL                  :: lverb, lneed_output, lrestart,&
-                                  lauto_domain, lparallel,lrenorm, loneiter
+                            lauto_domain, lparallel,lrenorm, loneiter,&
+                            lcoarse_geom                            
       INTEGER                  :: nvars, mtargets, iter, iunit_out,ier_paraexe
       INTEGER, ALLOCATABLE     :: var_dex(:),target_dex(:)
       INTEGER, ALLOCATABLE     :: arr_dex(:,:)

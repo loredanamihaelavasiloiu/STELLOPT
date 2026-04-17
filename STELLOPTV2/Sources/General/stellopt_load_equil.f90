@@ -164,7 +164,11 @@
             nu = 2 ** CEILING(log(REAL(nu))/log(2.0_rprec))
             nv = 4 * ntor_vmec + 5                                      ! Use at least 5 toroidal points
             nv = 2 ** CEILING(log(REAL(nv))/log(2.0_rprec)) + 1  ! Odd so we get nfp/2 plane
-
+            ! Use coarser grid during optimization to reduce spline setup cost
+            IF (lcoarse_geom) THEN
+               nu = MAX(nu / 2, 8)
+               nv = MAX((nv - 1) / 2 + 1, 5)
+            END IF
             ! Place the non-nyquist sized arrays on nyquist sized arrays
             ! Allocate helper arrays for 
             ns_extrap = FLOOR(sextrap*(ns_vmec-1)+1)

@@ -69,6 +69,7 @@
       lauto_domain = .false.
       lrenorm      = .false.
       loneiter     = .false.
+      lcoarse_geom = .true.
       lneed_bnormal = .false.
       lneed_dkes    = .false.
       lbooz         = .false.

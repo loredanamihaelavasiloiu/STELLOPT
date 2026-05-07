@@ -427,7 +427,12 @@
          ! a function call which is handles every equil_type.  Note these
          ! functions should handle iflag by returning immediately if
          ! iflag is set to a negative number upon entry.
-         CALL stellopt_load_equil(lscreen,iflag)
+         ! CALL stellopt_load_equil(lscreen,iflag)
+
+         IF (ncnt<2) then
+            CALL stellopt_load_equil(lscreen,iflag)
+         END IF
+
 
          ! Calls to secondary codes
          proc_string_old = proc_string ! So we can find the DIAGNO files

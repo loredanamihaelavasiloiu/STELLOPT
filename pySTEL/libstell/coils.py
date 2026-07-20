@@ -139,11 +139,15 @@ class COILSET():
 				plt.xlabel('Distance to plasma [m]')
 				plt.ylabel('Counts')
 				plt.title(f'Coil {j+1} - {self.groups[i].name}')
+				# if lsave:
+				# 	# Coil-to-plasma distance histogram
+				# 	plt.savefig(f'{self.ext}/coil_{j+1}_group_{i+1}_ctp_dist_histogram.png')
+				# plt.show()
 				if lsave:
-					# Coil-to-plasma distance histogram
 					plt.savefig(f'{self.ext}/coil_{j+1}_group_{i+1}_ctp_dist_histogram.png')
-				plt.show()
-
+					plt.close()
+				else:
+					plt.show()
 	def rescalecoils(self,npts_new):
 		"""Changes coil resolution
 

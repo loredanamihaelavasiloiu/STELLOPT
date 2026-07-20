@@ -188,8 +188,16 @@ class FIELDLINES():
 		ax.set_title(rf'FIELDLINES $\phi$ = {np.rad2deg(self.PHI_lines[0,k]):3.1f}')
 		ax.set_aspect('equal')
 		ax.set_xlim(rmin,rmax)
-		if lsave: pyplot.savefig(f'{savelocation}/fieldlines_poincare_phi{int(np.rad2deg(self.PHI_lines[0,k])):03d}.png',dpi=450)
-		if lplotnow: pyplot.show()
+		# if lsave: pyplot.savefig(f'{savelocation}/fieldlines_poincare_phi{int(np.rad2deg(self.PHI_lines[0,k])):03d}.png',dpi=450)
+		# if lplotnow: pyplot.show()
+		if lsave:
+			pyplot.savefig(
+				f'{savelocation}/fieldlines_poincare_phi{int(np.rad2deg(self.PHI_lines[0,k])):03d}.png',
+				dpi=450
+			)
+			pyplot.close()
+		elif lplotnow:
+			pyplot.show()
 
 	def plot_cloud(self,k,pointsize=0.01,color='red',plot3D=None):
 		"""Plots the FIELDILNES Poin in 3D

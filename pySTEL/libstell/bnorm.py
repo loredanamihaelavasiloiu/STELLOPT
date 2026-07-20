@@ -239,12 +239,16 @@ class BNORM(FourierRep):
 		nmax = int(max(np.squeeze(self.n)))
 		bmn = np.zeros((mmax+1,2*nmax+1))
 		for mn in range(self.mnmax):
-			m = int(self.m[mn])
-			n = int(self.n[mn]) + nmax
+			# m = int(self.m[mn])
+			# n = int(self.n[mn]) + nmax
+			m = int(self.m[mn].item())
+			n = int(self.n[mn].item()) + nmax
 			if type == 'sin':
-				bmn[m,n] = self.bmns[mn]
+				# bmn[m,n] = self.bmns[mn]
+				bmn[m,n] = self.bmns[mn].item()
 			elif type == 'cos':
-				bmn[m,n] = self.bmnc[mn]
+				# bmn[m,n] = self.bmnc[mn]
+				bmn[m,n] = self.bmnc[mn].item()
 		x = np.linspace(0,mmax,mmax+1)
 		y = np.linspace(-nmax,nmax,2*nmax+1)
 		# Include colorbar, quadmesh without interpolation
@@ -258,8 +262,12 @@ class BNORM(FourierRep):
 		ax.set_xlabel('Poloidal Modes (m)')
 		ax.set_ylabel('Toroidal Modes (n)')
 		ax.set_title(rf'BNORM Harmonic Spectrum (Sin)')
-		if lsave: pyplot.savefig(f'{self.ext}/bnorm_harm_{type}.png')
-		if lplotnow: pyplot.show()
+		# if lsave: pyplot.savefig(f'{self.ext}/bnorm_harm_{type}.png')
+		if lsave:
+			pyplot.savefig(f'{self.ext}/bnorm_harm_{type}.png')
+			pyplot.close()
+		elif lplotnow:
+			pyplot.show()
 
 	def plotBnmnSpectrum(self,ax=None,cmap='jet'):
 		"""Plots the Bnormal spectrum for a surface

@@ -856,11 +856,16 @@ class STELLOPT():
 		plt.setBGcolor()
 		# Colorbar
 		plt.colorbar(title='Coil Curvature')
-		# Save if requested
-		if lsave: plt.save(f'{save_folder}/coil_curvature.png')
+		# # Save if requested
+		# if lsave: plt.save(f'{save_folder}/coil_curvature.png')
 
-		# Render if requested
-		if lplotnow: plt.render()
+		# # Render if requested
+		# if lplotnow: plt.render()
+		# Save if requested
+		if lsave:
+			plt.save(f'{save_folder}/coil_curvature.png')
+		elif lplotnow:
+			plt.render()
 
 	def plot_stellopt_coil_torsion(self,plot3D=None,cmin=None, lsave=False,save_folder=None):
 		"""Plots coil torsion in 3D.
@@ -918,9 +923,13 @@ class STELLOPT():
 		# Colorbar
 		plt.colorbar(title='Coil Torsion')
 		# Save if requested
-		if lsave: plt.save(f'{save_folder}/coil_torsion.png')
-		# Render if requested
-		if lplotnow: plt.render()
+		# if lsave: plt.save(f'{save_folder}/coil_torsion.png')
+		# # Render if requested
+		# if lplotnow: plt.render()
+		if lsave:
+			plt.save(f'{save_folder}/coil_torsion.png')
+		elif lplotnow:
+			plt.render()
 
 	def plot_stellopt_baxis(self,plot3D=None):
 		"""Plots the baxis metric

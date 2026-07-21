@@ -404,8 +404,12 @@ class BNORM(FourierRep):
 		ax.set_title(rf'BNORM Real')
 		pyplot.colorbar(scatter,label=r'$B_{normal}$ [T]',ax=ax)
 		
-		if lsave: pyplot.savefig(f'{self.ext}/bnorm_real_surf.png')
-		if lplotnow: pyplot.show()
+		if lsave:
+			pyplot.savefig(f'{self.ext}/bnorm_real_surf.png')
+			pyplot.close()
+		elif lplotnow:
+			pyplot.show()
+
 		return scatter
 
 	def plotBrealsurf_3D(self,ax=None,cmap='jet',lsave=False):
